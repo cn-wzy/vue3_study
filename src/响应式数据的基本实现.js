@@ -34,6 +34,13 @@ let shouldTrack = true;
 function createReactive(obj, isShallow = false, isReadonly = false) {
   return new Proxy(data, {
     get(target, key, receiver) {
+      // Set中在设置set的时候，需要重写this指向
+      if (key === 'raw') return target
+      if (key === 'size') {
+        // 这时候使用Reflect的原因可以在这里体现
+        track(target, ITERATE_KEY)
+        return Reflect.get(target, key, target)
+      }
       // 没有activeEffect，直接返回
       if (key === "raw") {
         return target;
